@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiLogIn, FiUser, FiLock } from 'react-icons/fi';
-import { CgLock } from 'react-icons/cg';
-import { CiClock1, CiClock2 } from 'react-icons/ci';
+import { CiClock2 } from 'react-icons/ci';
+import { FiLock, FiUser } from 'react-icons/fi';
 
 export const Login = () => {
   const [username, setUsername] = useState('');
