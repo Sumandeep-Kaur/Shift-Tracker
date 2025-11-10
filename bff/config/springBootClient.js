@@ -3,11 +3,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const SPRING_BOOT_URL = process.env.SPRING_BOOT_URL || 'http://localhost:8080';
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080';
 
 // Create axios instance for Spring Boot backend
 const springBootClient = axios.create({
-  baseURL: SPRING_BOOT_URL,
+  baseURL: BACKEND_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
