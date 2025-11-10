@@ -27,3 +27,5 @@ export const ProtectedRoute = ({ children, requireAdmin = false }: ProtectedRout
 
   return <>{children}</>;
 };
+
+

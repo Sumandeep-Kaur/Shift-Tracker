@@ -1,4 +1,5 @@
-const API_BASE_URL = "https://shift-tracker-backend.up.railway.app/api";
+// Base URL for API calls (BFF)
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 
 export interface LoginRequest {
@@ -73,20 +74,37 @@ class ApiService {
     const customHeaders = options.headers as Record<string, string> | undefined;
     const hasAuth = customHeaders?.Authorization !== undefined;
     
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...this.getHeaders(!hasAuth),
-        ...(customHeaders || {}),
-      },
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...this.getHeaders(!hasAuth),
+          ...(customHeaders || {}),
+        },
+      });
 
-    if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error || `HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        // Try to parse error as JSON (BFF format)
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch {
+          // If not JSON, try as text
+          const errorText = await response.text();
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      return response.json();
+    } catch (error) {
+      // Handle network errors or other issues
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Network error: Unable to connect to server');
     }
-
-    return response.json();
   }
 
   // Auth endpoints

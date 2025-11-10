@@ -22,6 +22,12 @@ export const AdminDashboard = () => {
     password: '',
   });
 
+  const [formErrors, setFormErrors] = useState<{
+    name?: string;
+    username?: string;
+    password?: string;
+  }>({});
+
   const loadEmployees = async () => {
     setIsLoading(true);
     setError('');
@@ -53,7 +59,35 @@ export const AdminDashboard = () => {
     loadWeeklyHours();
   }, []);
 
+  const validateForm = () => {
+    const errors: { name?: string; username?: string; password?: string } = {};
+
+    if (!employeeForm.name.trim()) {
+      errors.name = 'Name is required';
+    } else if (employeeForm.name.trim().length < 2) {
+      errors.name = 'Name must be at least 2 characters';
+    }
+
+    if (!employeeForm.username.trim()) {
+      errors.username = 'Username is required';
+    } else if (employeeForm.username.trim().length < 3) {
+      errors.username = 'Username must be at least 3 characters';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(employeeForm.username)) {
+      errors.username = 'Username can only contain letters, numbers, and underscores';
+    }
+
+    if (!editingEmployee && !employeeForm.password) {
+      errors.password = 'Password is required';
+    } else if (employeeForm.password && employeeForm.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCreateEmployee = async () => {
+    if (!validateForm()) return;
     setIsLoading(true);
     setError('');
     try {
@@ -70,6 +104,7 @@ export const AdminDashboard = () => {
 
   const handleUpdateEmployee = async () => {
     if (!editingEmployee) return;
+    if (!validateForm()) return;
     setIsLoading(true);
     setError('');
     try {
@@ -122,6 +157,7 @@ export const AdminDashboard = () => {
       username: '',
       password: '',
     });
+    setFormErrors({});
   };
 
   const formatTime = (dateString: string) => {
@@ -430,12 +466,20 @@ export const AdminDashboard = () => {
                   <input
                     type="text"
                     value={employeeForm.name}
-                    onChange={(e) =>
-                      setEmployeeForm({ ...employeeForm, name: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    onChange={(e) => {
+                      setEmployeeForm({ ...employeeForm, name: e.target.value });
+                      if (formErrors.name) {
+                        setFormErrors({ ...formErrors, name: undefined });
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                      formErrors.name ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required
                   />
+                  {formErrors.name && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+                  )}
                 </div>
 
                 <div>
@@ -445,12 +489,20 @@ export const AdminDashboard = () => {
                   <input
                     type="text"
                     value={employeeForm.username}
-                    onChange={(e) =>
-                      setEmployeeForm({ ...employeeForm, username: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    onChange={(e) => {
+                      setEmployeeForm({ ...employeeForm, username: e.target.value });
+                      if (formErrors.username) {
+                        setFormErrors({ ...formErrors, username: undefined });
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                      formErrors.username ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required
                   />
+                  {formErrors.username && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.username}</p>
+                  )}
                 </div>
 
                 <div>
@@ -460,12 +512,20 @@ export const AdminDashboard = () => {
                   <input
                     type="password"
                     value={employeeForm.password}
-                    onChange={(e) =>
-                      setEmployeeForm({ ...employeeForm, password: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    onChange={(e) => {
+                      setEmployeeForm({ ...employeeForm, password: e.target.value });
+                      if (formErrors.password) {
+                        setFormErrors({ ...formErrors, password: undefined });
+                      }
+                    }}
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                      formErrors.password ? 'border-red-500' : 'border-gray-300'
+                    }`}
                     required={!editingEmployee}
                   />
+                  {formErrors.password && (
+                    <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
+                  )}
                 </div>
 
                 <div className="flex gap-3 pt-4">
