@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import type { ShiftResponse, WeeklyHoursResponse } from '../services/api';
-import { FiClock, FiLogOut, FiCalendar, FiRefreshCw } from 'react-icons/fi';
+import { FiClock, FiLogOut, FiCalendar, FiRefreshCw, FiX } from 'react-icons/fi';
 import { format } from 'date-fns';
 
 export const EmployeeDashboard = () => {
@@ -93,8 +93,15 @@ export const EmployeeDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-start">
+            <div className="pr-4">{error}</div>
+            <button
+              onClick={() => setError('')}
+              aria-label="Close error"
+              className="text-red-700 hover:text-red-900 ml-4"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
           </div>
         )}
 

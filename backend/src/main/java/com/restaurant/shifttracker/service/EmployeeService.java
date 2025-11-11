@@ -49,9 +49,10 @@ public class EmployeeService {
         employee.setName(request.getName());
         employee.setUsername(request.getUsername());
         
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            employee.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            employee.setPassword(passwordEncoder.encode(request.getPassword().trim()));
         }
+
         
         employee = employeeRepository.save(employee);
         return mapToResponse(employee);

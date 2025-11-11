@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { CiClock2 } from 'react-icons/ci';
-import { FiLock, FiUser } from 'react-icons/fi';
+import { FiLock, FiUser, FiX } from 'react-icons/fi';
 
 export const Login = () => {
   const [username, setUsername] = useState('');
@@ -40,8 +40,15 @@ export const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-start">
+              <div className="pr-4">{error}</div>
+              <button
+                onClick={() => setError('')}
+                aria-label="Close error"
+                className="text-red-700 hover:text-red-900 ml-4"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
             </div>
           )}
 

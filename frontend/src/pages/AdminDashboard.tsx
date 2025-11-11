@@ -107,8 +107,17 @@ export const AdminDashboard = () => {
     if (!validateForm()) return;
     setIsLoading(true);
     setError('');
+
     try {
-      await apiService.updateEmployee(editingEmployee.id, employeeForm);
+      // Create a payload object
+      const payload: EmployeeRequest = {
+        name: employeeForm.name!, 
+        username: employeeForm.username!,
+        ...(employeeForm.password?.trim() ? { password: employeeForm.password } : {})
+      };
+
+      await apiService.updateEmployee(editingEmployee.id, payload);
+
       setShowEmployeeModal(false);
       setEditingEmployee(null);
       resetForm();
@@ -126,8 +135,8 @@ export const AdminDashboard = () => {
     setError('');
     try {
       await apiService.deleteEmployee(id);
-      await loadEmployees();
-      await loadWeeklyHours();
+      // Update UI instantly after successful delete
+      setEmployees(prev => prev.filter(e => e.id !== id));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete employee');
     } finally {
@@ -140,7 +149,7 @@ export const AdminDashboard = () => {
     setEmployeeForm({
       name: employee.name,
       username: employee.username,
-      password: '',
+      password: '', 
     });
     setShowEmployeeModal(true);
   };
@@ -192,8 +201,15 @@ export const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-start">
+            <div className="pr-4">{error}</div>
+            <button
+              onClick={() => setError('')}
+              aria-label="Close error"
+              className="text-red-700 hover:text-red-900 ml-4"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
           </div>
         )}
 

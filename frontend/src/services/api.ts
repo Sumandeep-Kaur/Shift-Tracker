@@ -18,7 +18,7 @@ export interface LoginResponse {
 export interface EmployeeRequest {
   name: string;
   username: string;
-  password: string;
+  password?: string;
 }
 
 export interface EmployeeResponse {
@@ -67,45 +67,58 @@ class ApiService {
   }
 
   private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const customHeaders = options.headers as Record<string, string> | undefined;
-    const hasAuth = customHeaders?.Authorization !== undefined;
-    
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...this.getHeaders(!hasAuth),
-          ...(customHeaders || {}),
-        },
-      });
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const customHeaders = options.headers as Record<string, string> | undefined;
+  const hasAuth = customHeaders?.Authorization !== undefined;
 
-      if (!response.ok) {
-        // Try to parse error as JSON (BFF format)
-        let errorMessage = `HTTP error! status: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch {
-          // If not JSON, try as text
-          const errorText = await response.text();
-          errorMessage = errorText || errorMessage;
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...this.getHeaders(!hasAuth),
+        ...(customHeaders || {}),
+      },
+    });
+
+    if (!response.ok) {
+      // Parse error JSON or fallback to text
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      try {
+        const text = await response.text();
+        if (text) {
+          const parsed = JSON.parse(text);
+          errorMessage = parsed.error || parsed.message || errorMessage;
         }
-        throw new Error(errorMessage);
+      } catch {
+        // ignore parse error, keep default message
       }
-
-      return response.json();
-    } catch (error) {
-      // Handle network errors or other issues
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Network error: Unable to connect to server');
+      throw new Error(errorMessage);
     }
+
+    // ✅ Handle 204 No Content properly
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
+    // ✅ Try reading body safely (avoid JSON parse on empty body)
+    const text = await response.text();
+    if (!text) {
+      return undefined as T;
+    }
+
+    return JSON.parse(text) as T;
+
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Network error: Unable to connect to server");
   }
+}
+
 
   // Auth endpoints
   async login(credentials: LoginRequest): Promise<LoginResponse> {
