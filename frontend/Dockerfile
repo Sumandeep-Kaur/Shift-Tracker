@@ -1,19 +1,15 @@
-# frontend/Dockerfile
-FROM node:20-alpine
-
-# Set working directory
+# Stage 1: build
+FROM node:20-alpine AS builder
 WORKDIR /app
-
-# Install dependencies
 COPY package*.json ./
 RUN npm install
-
-# Copy all source files
 COPY . .
+RUN npm run build
 
-# Expose Vite dev server port
-EXPOSE 5173
-
-# Start Vite dev server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
-
+# Stage 2: serve
+FROM node:20-alpine
+WORKDIR /app
+RUN npm install -g serve
+COPY --from=builder /app/dist ./dist
+EXPOSE 3000
+CMD ["serve", "-s", "dist", "-l", "3000"]
